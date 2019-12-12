@@ -13,13 +13,15 @@ TARGET_OTA_ASSERT_DEVICE := logan2g
 # Architecture
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
-TARGET_CPU_VARIANT := cortex-a5
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
+TARGET_CPU_SMP := true
+# Cortex-A9 is more closer to Cortex-A5 than Cortex-A7
+TARGET_CPU_VARIANT := cortex-a9
 ARCH_ARM_HAVE_ARMV7A := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
-TARGET_GLOBAL_CFLAGS += -mcpu=cortex-a5 -mfloat-abi=softfp -mfpu=neon-vfpv4
-TARGET_GLOBAL_CPPFLAGS += -mcpu=cortex-a5 -mfloat-abi=softfp -mfpu=neon-vfpv4
+TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=neon
+TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=neon
 
 # GT-S7262 doesnt supports vfp-d32
 ARCH_ARM_HAVE_VFP_D32 := false
@@ -38,7 +40,7 @@ BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8
 BOARD_KERNEL_IMAGE_NAME := Image
 BOARD_KERNEL_PAGESIZE :=  2048
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x00000100
-TARGET_KERNEL_CONFIG := logan-vlx_defconfig
+TARGET_KERNEL_CONFIG := cyanogenmod_logan2g_defconfig
 TARGET_KERNEL_SOURCE := kernel/samsung/logan2g
 
 # Partition Size
