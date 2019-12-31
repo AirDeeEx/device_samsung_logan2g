@@ -14,10 +14,7 @@
 
 $(call inherit-product, device/samsung/logan2g/full_logan2g.mk)
 
-# Inherit some common CM stuff.
-$(call inherit-product, vendor/cm/config/common_full_phone.mk)
-
-PRODUCT_NAME := cm_logan2g
+PRODUCT_NAME := aosp_logan2g
 BOARD_VENDOR := samsung
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
