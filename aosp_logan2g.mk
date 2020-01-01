@@ -17,6 +17,10 @@ $(call inherit-product, device/samsung/logan2g/full_logan2g.mk)
 # Inherit some common AEX stuff.
 $(call inherit-product, vendor/aosp/common.mk)
 
+#Bootanimation res
+TARGET_BOOT_ANIMATION_RES := 480
+
+## Device identifier. This must come after all inclusions
 PRODUCT_NAME := aosp_logan2g
 BOARD_VENDOR := samsung
 
