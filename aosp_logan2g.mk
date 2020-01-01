@@ -14,6 +14,9 @@
 
 $(call inherit-product, device/samsung/logan2g/full_logan2g.mk)
 
+# Inherit some common AEX stuff.
+$(call inherit-product, vendor/aosp/common.mk)
+
 PRODUCT_NAME := aosp_logan2g
 BOARD_VENDOR := samsung
 
