@@ -20,7 +20,6 @@ $(call inherit-product-if-exists, vendor/samsung/logan2g/logan2g-vendor.mk)
 # Screen density
 PRODUCT_AAPT_CONFIG := normal hdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
-PRODUCT_LOCALES += hdpi
 
 # Overlays
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
@@ -33,16 +32,14 @@ $(shell mkdir -p $(LOCAL_PATH)/../../../out/target/product/logan2g/recovery/root
 $(shell ln -sf -t $(LOCAL_PATH)/../../../out/target/product/logan2g/recovery/root/system/bin ../../sbin/sh)
 
 # Init files
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/rootdir/fstab.sc6820i:root/fstab.sc6820i \
-    $(LOCAL_PATH)/rootdir/init.sc6820i.rc:root/init.sc6820i.rc \
-    $(LOCAL_PATH)/rootdir/init.sc6820i.usb.rc:root/init.sc6820i.usb.rc \
-    $(LOCAL_PATH)/rootdir/lpm.rc:root/lpm.rc \
-    $(LOCAL_PATH)/rootdir/ueventd.sc6820i.rc:root/ueventd.sc6820i.rc \
-    $(LOCAL_PATH)/rootdir/bin/charge:root/bin/charge \
-    $(LOCAL_PATH)/rootdir/bin/poweroff_alarm:root/bin/poweroff_alarm
+PRODUCT_PACKAGES += \
+  fstab.sc6820i \
+  init.sc6820i.rc \
+  init.sc6820i.usb.rc \
+  lpm.rc \
+  ueventd.sc6820i.rc
 
-# Permissions
+# These are the hardware-specific features
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.audio.output.xml:system/etc/permissions/android.hardware.audio.output.xml \
     frameworks/native/data/etc/android.hardware.bluetooth.xml:system/etc/permissions/android.hardware.bluetooth.xml \
@@ -60,7 +57,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/native/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
-    frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
+    frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
 
 # Wifi files
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/config/config-bcm.mk)
@@ -119,6 +116,10 @@ PRODUCT_PACKAGES += \
     libatchannel \
     libatchannel_wrapper
 
+# Board
+PRODUCT_PACKAGES += \
+    lights.sc6820i
+
 # Input
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/keylayout/AVRCP.kl:system/usr/keylayout/AVRCP.kl \
@@ -141,10 +142,6 @@ PRODUCT_COPY_FILES += \
     frameworks/av/media/libstagefright/data/media_codecs_google_telephony.xml:system/etc/media_codecs_google_telephony.xml \
     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:system/etc/media_codecs_google_video.xml
 
-# Init
-PRODUCT_PACKAGES += \
-    prop_init
-
 # Web
 PRODUCT_PACKAGES += \
     libskia_legacy
@@ -156,6 +153,11 @@ PRODUCT_PACKAGES += \
 # Service mode
 PRODUCT_PACKAGES += \
     SamsungServiceMode
+
+# Snap Camera
+PRODUCT_PACKAGES += \
+    Snap \
+    Gallery2
 
 # Charger
 PRODUCT_PACKAGES += \
@@ -172,7 +174,8 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 # Insecure ADB
 ADDITIONAL_DEFAULT_PROPERTIES += \
     ro.secure=0 \
-    ro.adb.secure=0
+    ro.adb.secure=0 \
+    persist.service.adb.enable=0
 
 # OpenGLRenderer Configuration
 # https://source.android.com/devices/tech/config/renderer
@@ -195,7 +198,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # Languages
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.product.locale.language=en \
-    ro.product.locale.region=GB
+    ro.product.locale.region=US
 
 # SPRD default build.prop properties overrides
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -236,10 +239,26 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.call_ring=0 \
     ro.crypto.state=unsupported
 
+# ART device props
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.dex2oat-Xms=8m \
+    dalvik.vm.dex2oat-Xmx=96m \
+    dalvik.vm.dex2oat-flags=--no-watch-dog \
+    dalvik.vm.dex2oat-filter=interpret-only \
+    dalvik.vm.image-dex2oat-Xms=48m \
+    dalvik.vm.image-dex2oat-Xmx=48m \
+    dalvik.vm.image-dex2oat-filter=speed
+
+# Force use old camera api
+PRODUCT_PROPERTY_OVERRIDES += \
+    camera2.portability.force_api=1
+
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
 PRODUCT_NAME := full_logan2g
 PRODUCT_DEVICE := logan2g
 PRODUCT_BRAND := samsung
 PRODUCT_MODEL := GT-S7262
 PRODUCT_MANUFACTURER := samsung
+
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 

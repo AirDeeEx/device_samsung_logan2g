@@ -1,10 +1,3 @@
-# config.mk
-#
-# Product-specific compile-time definitions.
-#
-
-# The generic product target doesn't have any hardware-specific pieces.
-
 DEVICE_PATH := device/samsung/logan2g
 
 # Assert
@@ -34,11 +27,14 @@ TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 COMMON_GLOBAL_CFLAGS += -DSPRD_HARDWARE
 
+# For low memory targets only (~512MB RAM & hdpi resolution)
+TARGET_ARCH_LOWMEM := true
+
 # Kernel
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8
 BOARD_KERNEL_IMAGE_NAME := Image
-BOARD_KERNEL_PAGESIZE :=  2048
+BOARD_KERNEL_PAGESIZE := 2048
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x00000100
 TARGET_KERNEL_CONFIG := cyanogenmod_logan2g_defconfig
 TARGET_KERNEL_SOURCE := kernel/samsung/logan2g
@@ -55,7 +51,7 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_VENDOR_USE_AKMD := akmd8975
 
 # Recovery
-TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/fstab.sc6820i
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.sc6820i
 BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../$(DEVICE_PATH)/recovery/recovery_keys.c
 BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_15x24.h\"
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
@@ -74,7 +70,11 @@ BOARD_USE_MHEAP_SCREENSHOT := true
 BOARD_EGL_WORKAROUND_BUG_10194508 := true
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 HWUI_COMPILE_FOR_PERF := true
-COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS
+COMMON_GLOBAL_CFLAGS += -DNEEDS_VECTORIMPL_SYMBOLS -DADD_LEGACY_ACQUIRE_BUFFER_SYMBOL -DREFBASE_JB_MR1_COMPAT_SYMBOLS
+COMMON_GLOBAL_CFLAGS += -DBOARD_CANT_REALLOCATE_OMX_BUFFERS
+
+# GT-S7262 has OpenGL ES 2.0 implementation
+BOARD_USE_BGRA_8888 := true
 
 # Camera
 USE_DEVICE_SPECIFIC_CAMERA := true
@@ -118,25 +118,33 @@ BOARD_MOBILEDATA_INTERFACE_NAME := "rmnet0"
 COMMON_GLOBAL_CFLAGS += -DSEC_PRODUCT_FEATURE_RIL_CALL_DUALMODE_CDMAGSM
 BOARD_USE_LIBATCHANNEL_WRAPPER := true
 
+# Media
+TARGET_USES_MEDIA_EXTENSIONS := true
+USE_SAMSUNG_COLORFORMAT := true
+
+# FM Radio
+BOARD_HAVE_FM_RADIO := true
+BOARD_FM_DEVICE := bcm4330
+BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
+
 # healthd
 BOARD_HAL_STATIC_LIBRARIES := libhealthd.sprd
 
-# Crypto
-TARGET_HW_DISK_ENCRYPTION := true
+# CMHW
+BOARD_HARDWARE_CLASS := $(DEVICE_PATH)/cmhw/
+
+# LightHAL
+TARGET_PROVIDES_LIBLIGHT := true
 
 # Filesystem
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_USERIMAGES_USE_EXT4 := true
-TARGET_USERIMAGES_USE_F2FS := true
-
-# Media
-TARGET_USES_MEDIA_EXTENSIONS := true
+#TARGET_USERIMAGES_USE_F2FS := true
 
 # Charger
 BACKLIGHT_PATH := /sys/class/backlight/panel/brightness
 BOARD_NO_CHARGER_LED := true
 BOARD_CHARGER_ENABLE_SUSPEND := true
-CHARGING_ENABLED_PATH := /sys/class/power_supply/battery/batt_lp_charging
 BOARD_CHARGING_MODE_BOOTING_LPM := /sys/class/power_supply/battery/batt_lp_charging
 
 # Resolution
@@ -153,6 +161,22 @@ TARGET_BOOTANIMATION_TEXTURE_CACHE := true
 SMALLER_FONT_FOOTPRINT := true
 MINIMAL_FONT_FOOTPRINT := true
 
+# Compat
+TARGET_USES_LOGD := false
+
+# ART
+# jemalloc causes a lot of random crash on free()
+MALLOC_IMPL := dlmalloc
+
 # SELinux
 BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
-BOARD_SEPOLICY_UNION += file_contexts
+
+# Enable dex-preoptimization to speed up first boot sequence
+ifeq ($(HOST_OS),linux)
+  ifeq ($(TARGET_BUILD_VARIANT),userdebug)
+  ifeq ($(WITH_DEXPREOPT),)
+WITH_DEXPREOPT := true
+  endif
+ endif
+endif
+DONT_DEXPREOPT_PREBUILTS := true
